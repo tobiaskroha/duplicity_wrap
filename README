@@ -1,0 +1,13 @@
+Installation:
+
+cp duplicity_wrap.sh /usr/local/sbin
+mkdir /etc/duplicity_wrap
+
+cp example_config/duplicity_wrap.cfg /etc/duplicity_wrap
+cp example_config/exclude_files /etc/duplicity_wrap
+cp example_config/duplicity_wrap.cron /etc/cron.d
+
+# configure duplicity_wrap by editing files above
+
+/etc/init.d/cron restart
+

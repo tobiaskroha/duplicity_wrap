@@ -1,0 +1,15 @@
+/sys
+/proc
+/dev
+/tmp
+/var/tmp
+/var/lib/php5
+/var/lib/php
+/media
+/var/lib/mysql
+/var/lib/lucene
+/var/spool/postfix
+**/cache
+/home/chroot
+/lib/udev
+/var/run

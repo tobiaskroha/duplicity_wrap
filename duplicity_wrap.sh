@@ -12,7 +12,7 @@ export PASSPHRASE
 export FTP_PASSWORD
 
 ARCHIVE_DIR='/var/duplicity/archive'
-DUP_ARGUMENTS="--ssh-askpass --archive-dir $ARCHIVE_DIR --exclude-other-filesystems --exclude-globbing-filelist /etc/duplicity/exclude_files"
+DUP_ARGUMENTS="--ssh-askpass --archive-dir $ARCHIVE_DIR --exclude-other-filesystems --exclude-globbing-filelist /etc/duplicity_wap/exclude_files"
 BACKUP_STATUS="BACKUP_OK"
 HOSTNAME=`hostname -s`
 LOGFILE='/var/log/duplicity.log'

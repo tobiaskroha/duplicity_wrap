@@ -44,7 +44,12 @@ fi
 
 # Take action depending on parameter
 
-if [ "$1" = "status" ]; then
+if [ "$1" = "space" ]; then
+   echo "Space used:"
+   echo du -hs . | lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "$TARGET_DIR"
+   exit
+
+elif [ "$1" = "status" ]; then
    duplicity $DUP_ARGUMENTS collection-status $TARGET_DIR
    exit
 
@@ -107,7 +112,9 @@ elif [ "$1" = "full" ]; then
    if [ "$?" -ne "0" ]; then
       BACKUP_STATUS="BACKUP_FAILED"
    fi
-   ./$0 status 2>&1 > $LOGFILE
+
+   $0 status
+   $0 space
 
    cat $LOGFILE | mail -s "Full $BACKUP_STATUS : $HOSTNAME" $MAIL_TO
 
@@ -128,7 +135,9 @@ elif [ "$1" = "incremental" ]; then
    if [ "$?" -ne "0" ]; then
       BACKUP_STATUS="BACKUP_FAILED"
    fi
+
    $0 status
+   $0 space
 
    if [ "$SEND_MAIL" ]; then
       cat $LOGFILE | mail -s "Incremental $BACKUP_STATUS : $HOSTNAME" $MAIL_TO

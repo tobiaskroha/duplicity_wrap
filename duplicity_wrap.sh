@@ -16,6 +16,7 @@ DUP_ARGUMENTS="--ssh-askpass --archive-dir $ARCHIVE_DIR --exclude-other-filesyst
 BACKUP_STATUS="BACKUP_OK"
 HOSTNAME=`hostname -s`
 LOGFILE='/var/log/duplicity.log'
+TARGET_DIR="$PROTOCOL://$FTP_USERNAME@$SERVER"
 
 # Read parameters
 
@@ -46,7 +47,11 @@ fi
 
 if [ "$1" = "space" ]; then
    echo "Space used:"
-   echo du -hs . | lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "$TARGET_DIR"
+   if [ "$PROTOCOL" = "scp" ]; then
+      echo "du -h" | lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "sftp://$SERVER"
+   else 
+      echo "du -h" | lftp -u "$FTP_USERNAME,$FTP_PASSWORD" "ftp://$SERVER"
+   fi
    exit
 
 elif [ "$1" = "status" ]; then

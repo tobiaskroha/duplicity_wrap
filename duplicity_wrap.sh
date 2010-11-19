@@ -1,5 +1,38 @@
 #!/bin/bash
 
+function prepare_backup() {
+
+   $0 deleteold
+   if [ "$?" -ne "0" ]; then
+      BACKUP_STATUS="BACKUP_FAILED: Cleanup"
+   fi
+
+   $0 mysql_dump
+
+   if [ "$?" -ne "0" ]; then
+      BACKUP_STATUS="BACKUP_FAILED: Mysql"
+   fi
+
+   $0 svn_dump
+
+   if [ "$?" -ne "0" ]; then
+      BACKUP_STATUS="BACKUP_FAILED: Subversion"
+   fi
+
+}
+
+function postprocess_backup() {
+   $0 status
+   $0 space
+
+   if [ "$SEND_MAIL" ]; then
+      cat $LOGFILE | mail -s "$BACKUP_STATUS : $HOSTNAME" $MAIL_TO
+   fi
+
+}
+
+umask 177
+
 # read config
 source '/etc/duplicity_wrap/duplicity_wrap.cfg'
 
@@ -12,11 +45,15 @@ export PASSPHRASE
 export FTP_PASSWORD
 
 ARCHIVE_DIR='/var/duplicity/archive'
-DUP_ARGUMENTS="--ssh-askpass --archive-dir $ARCHIVE_DIR --exclude-other-filesystems --exclude-globbing-filelist /etc/duplicity_wrap/exclude_files"
+DUP_ARGUMENTS="--ssh-askpass --archive-dir $ARCHIVE_DIR --exclude-globbing-filelist /etc/duplicity_wrap/exclude_files"
 BACKUP_STATUS="BACKUP_OK"
 HOSTNAME=`hostname -s`
 LOGFILE='/var/log/duplicity.log'
-TARGET_DIR="$PROTOCOL://$FTP_USERNAME@$SERVER"
+TARGET_DIR="$PROTOCOL://$FTP_USERNAME:@$SERVER"
+
+if [ "$REMOTE_DIRECTORY" ]; then 
+  TARGET_DIR="$TARGET_DIR/$REMOTE_DIRECTORY"
+fi
 
 # Read parameters
 
@@ -62,6 +99,7 @@ elif [ "$1" = "list" ]; then
    duplicity $DUP_ARGUMENTS list-current-files $TARGET_DIR
    exit
 
+
 elif [ "$1" = "cleanup" ]; then
 
     duplicity $DUP_ARGUMENTS cleanup --force $TARGET_DIR
@@ -81,10 +119,33 @@ elif [ "$1" = "deleteold" ]; then
         exit 1
     fi
 
+elif [ "$1" = "svn_dump"  ]; then
+
+    if [ "$SUBVERSION_DIRECTORY" ]; then
+       rm -rf /backup/svn_dump*
+
+       filename="svn_dump_"$(date +"%YY%mM%dD_%Hh%Mm")
+       mkdir "/backup/$filename"
+
+       cd "$SUBVERSION_DIRECTORY"
+       for f in *; do
+          if [ -d "$f" ]; then
+              svnadmin hotcopy "$f" "/backup/$filename/$f"
+              if [ "$?" -ne "0" ]; then
+                echo "svn dump error.: $f"
+	        exit 1
+              fi
+          fi
+       done
+   
+    fi
+    exit 0
+
+
 elif [ "$1" = "mysql_dump" ]; then
     filename="mysql_dump_"$(date +"%YY%mM%dD_%Hh%Mm")".sql"
 
-    rm -f /backup/*
+    rm -f /backup/mysql_dump*
 
     mysqlcheck -A --user=$MYSQL_USER --password=$MYSQL_PASSWORD -s
     result=$?
@@ -101,55 +162,29 @@ elif [ "$1" = "mysql_dump" ]; then
     fi
 
 elif [ "$1" = "full" ]; then
-   $0 deleteold
+   prepare_backup
 
+   duplicity  $DUP_ARGUMENTS full / $TARGET_DIR
    if [ "$?" -ne "0" ]; then
       BACKUP_STATUS="BACKUP_FAILED"
    fi
 
-   $0 mysql_dump
+   postprocess_backup 
 
-   if [ "$?" -ne "0" ]; then
-      BACKUP_STATUS="BACKUP_FAILED"
-   fi
-
-   duplicity $DUP_ARGUMENTS full / $TARGET_DIR
-   if [ "$?" -ne "0" ]; then
-      BACKUP_STATUS="BACKUP_FAILED"
-   fi
-
-   $0 status
-   $0 space
-
-   cat $LOGFILE | mail -s "Full $BACKUP_STATUS : $HOSTNAME" $MAIL_TO
 
 elif [ "$1" = "incremental" ]; then
 
-   $0 deleteold
-   if [ "$?" -ne "0" ]; then
-      BACKUP_STATUS="BACKUP_FAILED"
-   fi
-
-   $0 mysql_dump
-
-   if [ "$?" -ne "0" ]; then
-      BACKUP_STATUS="BACKUP_FAILED"
-   fi
+   prepare_backup
 
    duplicity -vINFO $DUP_ARGUMENTS incremental / $TARGET_DIR
    if [ "$?" -ne "0" ]; then
       BACKUP_STATUS="BACKUP_FAILED"
    fi
 
-   $0 status
-   $0 space
-
-   if [ "$SEND_MAIL" ]; then
-      cat $LOGFILE | mail -s "Incremental $BACKUP_STATUS : $HOSTNAME" $MAIL_TO
-   fi
+   postprocess_backup 
 
 else
-   echo "Valid duplicity_wrap.sh arguments: list, cleanup, deleteold, full, incremental, mysql_dump"
+   echo "Valid duplicity_wrap.sh arguments: space,list, cleanup, deleteold, full, incremental, mysql_dump, svn_dump"
    echo "     -m   :  Send output via mail"
    exit 1;
 fi

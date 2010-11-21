@@ -150,7 +150,7 @@ function mysql_dump {
       fi
    else
       if [ ! -z $MYSQL_BACKUP_USER ]; then
-         MYSQL_EXTERNAL_BACKUP="sudo -u ${MYSQL_BACKUP_USER} ${MYSQL_EXTERNAL_BACKUP}"
+         MYSQL_EXTERNAL_BACKUP="sudo -i -u ${MYSQL_BACKUP_USER} ${MYSQL_EXTERNAL_BACKUP}"
       fi
       $MYSQL_EXTERNAL_BACKUP
    fi

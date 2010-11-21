@@ -229,7 +229,7 @@ case "$1" in
      ;;
     *)
       echo "Valid duplicity_wrap.sh arguments:" 1>&2
-      echo "list, cleanup, deleteold, full, incremental, mysql_dump, svn_dump" 1>&2
+      echo "list, status, cleanup, deleteold, full, incremental, mysql_dump, svn_dump" 1>&2
       echo "     -m   :  Send output via mail" 1>&2
       exit 1
       ;;

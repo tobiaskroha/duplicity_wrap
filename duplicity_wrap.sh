@@ -175,7 +175,7 @@ function prepare_backup() {
 }
 
 function postprocess_backup() {
-   status
+   collection_status
    space
 
    if [ "$SEND_MAIL" ]; then
@@ -205,10 +205,6 @@ case "$1" in
       ;;
    mysql_dump)
       mysql_dump
-      ;;
-   test)
-      prepare_backup
-      echo "Result: $BACKUP_STATUS"
       ;;
    full)
      prepare_backup

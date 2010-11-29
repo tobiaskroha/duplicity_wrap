@@ -19,7 +19,11 @@ fi
 
 export PASSPHRASE
 
-ARCHIVE_DIR='/var/duplicity/archive'
+if [ ! $ARCHIVE_DIR ]; then
+   ARCHIVE_DIR='/var/duplicity/archive'
+fi
+
+
 DUP_ARGUMENTS="--archive-dir $ARCHIVE_DIR --exclude-globbing-filelist ${CFG_DIR}/exclude_files"
 if [ ! -z $FTP_PASSWORD ]; then
    export FTP_PASSWORD

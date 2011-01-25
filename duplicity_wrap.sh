@@ -30,7 +30,7 @@ if [ ! -z $FTP_PASSWORD ]; then
    DUP_ARGUMENTS="${DUP_ARGUMENTS} --ssh-askpass"
 fi
 
-BACKUP_STATUS="BACKUP_OK"
+BACKUP_STATUS="DUPLICITY_OK"
 HOSTNAME=`hostname -s`
 LOGFILE='/var/log/duplicity.log'
 
@@ -211,6 +211,7 @@ case "$1" in
       mysql_dump
       ;;
    full)
+     BACKUP_STATUS="FULL BACKUP_OK"
      prepare_backup
      duplicity $DUP_ARGUMENTS full / $TARGET_DIR
      if [ "$?" -ne "0" ]; then
@@ -219,6 +220,8 @@ case "$1" in
      postprocess_backup
      ;;
    incremental)
+     BACKUP_STATUS="INCREMENTAL BACKUP_OK"
+
      prepare_backup
 
      duplicity -vINFO $DUP_ARGUMENTS incremental / $TARGET_DIR

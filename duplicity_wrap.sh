@@ -135,23 +135,27 @@ function svn_dump {
 
 function mysql_dump {
   if [ -z $MYSQL_EXTERNAL_BACKUP ]; then
-    filename="mysql_dump_"$(date +"%YY%mM%dD_%Hh%Mm")".sql"
 
-    rm -f /backup/mysql_dump*
+    if [ ! -z ${MYSQL_USER} ]; then
+   
+	 filename="mysql_dump_"$(date +"%YY%mM%dD_%Hh%Mm")".sql"
 
-      mysqlcheck -A $MYSQL_ARGUMENTS -s
-      result=$?
-      if [ $result -ne 0 ]; then
-         echo "mysqlcheck error. Returncode: $result" 
-         return 1
-      fi
+	 rm -f /backup/mysql_dump*
 
-      mysqldump --all-databases $MYSQL_ARGUMENTS > /backup/$filename
-      result=$?
-      if [ $result -ne 0 ]; then
-         echo "mysqldump error. Returncode: $result" 
-         return 1
-      fi
+	 mysqlcheck -A $MYSQL_ARGUMENTS -s
+	 result=$?
+	 if [ $result -ne 0 ]; then
+	     echo "mysqlcheck error. Returncode: $result" 
+	     return 1
+	 fi
+
+	 mysqldump --all-databases $MYSQL_ARGUMENTS > /backup/$filename
+	 result=$?
+	 if [ $result -ne 0 ]; then
+	     echo "mysqldump error. Returncode: $result" 
+             return 1
+	 fi
+    fi
    else
       if [ ! -z $MYSQL_BACKUP_USER ]; then
          MYSQL_EXTERNAL_BACKUP="sudo -i -u ${MYSQL_BACKUP_USER} ${MYSQL_EXTERNAL_BACKUP}"

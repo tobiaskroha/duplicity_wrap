@@ -189,7 +189,7 @@ function postprocess_backup() {
    fi
 
    collection_status
-   #space
+   space
 
    if [ "$SEND_MAIL" ]; then
       cat $LOGFILE | mail -s "$BACKUP_STATUS : $HOSTNAME" $MAIL_TO

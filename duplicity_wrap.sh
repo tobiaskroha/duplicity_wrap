@@ -108,7 +108,7 @@ function deleteold {
 }
 
 function cleanup {
-   duplicity $DUP_ARGUMENTS cleanup --force $TARGET_DIR
+   duplicity $DUP_ARGUMENTS cleanup --extra-clean --force $TARGET_DIR
 }
 
 function svn_dump {

@@ -108,7 +108,7 @@ function deleteold {
 }
 
 function cleanup {
-   duplicity $DUP_ARGUMENTS cleanup --force $TARGET_DIR
+   duplicity $DUP_ARGUMENTS cleanup --extra-clean --force $TARGET_DIR
 }
 
 function svn_dump {
@@ -167,7 +167,7 @@ function mysql_dump {
 function prepare_backup() {
    deleteold
    if [ "$?" -ne "0" ]; then
-      BACKUP_STATUS="BACKUP_FAILED: Cleanup"
+      BACKUP_STATUS="BACKUP_FAILED: Cleanup (pre)"
    fi
 
    mysql_dump
@@ -183,6 +183,11 @@ function prepare_backup() {
 }
 
 function postprocess_backup() {
+   deleteold
+   if [ "$?" -ne "0" ]; then
+      BACKUP_STATUS="BACKUP_FAILED: Cleanup (post)"
+   fi
+
    collection_status
    space
 

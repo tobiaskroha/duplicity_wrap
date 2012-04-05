@@ -1,2 +1,2 @@
-58 1 * * sun       root     /usr/local/sbin/duplicity_wrap.sh -m full
-58 1 * * mon-sat   root     /usr/local/sbin/duplicity_wrap.sh -m incremental
+00 4    * * sun       root    /usr/local/bin/duplicity_full
+00 4    * * mon-sat   root    /usr/local/bin/duplicity_incremental

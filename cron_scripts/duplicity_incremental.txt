@@ -1,0 +1,4 @@
+#!/bin/sh
+SCRIPT_PATH=/usr/local/sbin/duplicity_wrap.sh
+test $(ps aux | grep ${SCRIPT_PATH} | grep -v grep | wc -l) != 0 && echo "duplicity is already running" && exit 0
+${SCRIPT_PATH} -m incremental

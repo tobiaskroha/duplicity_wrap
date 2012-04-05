@@ -13,3 +13,4 @@
 /home/chroot
 /lib/udev
 /var/run
+/var/duplicity/archive
